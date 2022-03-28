@@ -14,6 +14,7 @@ import requests
 import os
 import logging
 import time
+import telegram_send
 
 
 def findUniqueElements(oldList, newList):
@@ -59,7 +60,7 @@ def getAdsFromListAm(params):
 if __name__ == "__main__":
     # Setup params
     errorCounter = 0
-    refreshRate = 5*60
+    refreshRate = 60
     price = 450
     roomsAmout = 3
     dbFileName = f'db_price_{price}_rooms_{roomsAmout}.txt'
@@ -89,10 +90,13 @@ if __name__ == "__main__":
             with open(dbFileName, "r") as db:
                 oldlinks = [line.rstrip('\n') for line in db]
 
+            # if new elements appear - save them and send to the telegramm
             newLinks = findUniqueElements(oldlinks, links)
             if newLinks:
                 logging.info(f'NEW LINKS!!! : {newLinks}')
+                telegram_send.send(messages=newLinks)
 
+            # refresh db with the new links
             with open(dbFileName, "w") as db:
                 db.write('\n'.join(links))
 
