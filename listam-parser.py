@@ -15,6 +15,7 @@ import os
 import logging
 import time
 import telegram_send
+import argparse
 
 
 def findUniqueElements(oldList, newList):
@@ -58,11 +59,21 @@ def getAdsFromListAm(params):
 
 
 if __name__ == "__main__":
+    # Parse args
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--price', type=int, required=True)
+        parser.add_argument('--rooms', type=int, required=True)
+        args = parser.parse_args()
+    except Exception as ex:
+        print(ex)
+        quit()
+
     # Setup params
     errorCounter = 0
     refreshRate = 60
-    price = 450
-    roomsAmout = 3
+    price = args.price
+    roomsAmout = args.rooms
     dbFileName = f'db_price_{price}_rooms_{roomsAmout}.txt'
     params = getParams(price, roomsAmout)
     loggingFileName = f'logs_price_{price}_rooms_{roomsAmout}.log'
