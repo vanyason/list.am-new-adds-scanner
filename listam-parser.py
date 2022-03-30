@@ -79,7 +79,7 @@ if __name__ == "__main__":
     refreshRate = 60
     price = args.price
     roomsAmout = args.rooms
-    dbFileName = f'db_price_{price}USD_rooms_{roomsAmout}.txt'
+    dbFileName = f'db_price_{price}USD_rooms_{roomsAmout}.db'
     loggingFileName = f'logs_price_{price}USD_rooms_{roomsAmout}.log'
     logging.basicConfig(format='%(asctime)s - %(levelname)s:%(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p',
