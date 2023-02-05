@@ -1,4 +1,5 @@
 parsed.html
 *.log
+*.json
 .vscode
 *.db

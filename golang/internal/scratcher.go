@@ -1,43 +1,16 @@
-package main
+package internal
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"net/http"
-	"os"
+	"regexp"
+	"strings"
 	"time"
 
-	"github.com/jessevdk/go-flags"
+	"golang.org/x/exp/maps"
+	"golang.org/x/net/html"
 )
-
-type CmdArguments struct {
-	Price        uint `short:"p" long:"price" description:"price in drams" required:"true"`
-	Rooms        uint `short:"r" long:"rooms" description:"amount of rooms. 0 means do not care" default:"0"`
-	ErrorCounter uint `short:"e" long:"errorcounter" description:"amount of errors to stop execution. 0 means never" default:"15"`
-}
-
-func parseCmdLineArgs() (CmdArguments, error) {
-	var args CmdArguments
-	if _, err := flags.NewParser(&args, flags.HelpFlag|flags.PassDoubleDash).Parse(); err != nil {
-		return args, err
-	}
-
-	const maxPrice uint = 10000000
-	const maxRooms uint = 10
-	const maxErrors uint = 50
-
-	if args.Price > maxPrice {
-		return CmdArguments{}, fmt.Errorf("invalid price: %d. max: %d", args.Price, maxPrice)
-	}
-	if args.Rooms > maxRooms {
-		return CmdArguments{}, fmt.Errorf("invalid rooms amount counter: %d. max: %d", args.Rooms, maxRooms)
-	}
-	if args.ErrorCounter > maxErrors {
-		return CmdArguments{}, fmt.Errorf("invalid error counter: %d. max: %d", args.ErrorCounter, maxErrors)
-	}
-
-	return args, nil
-}
 
 type ScratchData struct {
 	Header                   string
@@ -48,14 +21,14 @@ type ScratchData struct {
 	HousesStopWord           string
 }
 
-func generateScratchData(args CmdArguments) ScratchData {
+func GenerateScratchData(args CmdArguments) ScratchData {
 	sd := ScratchData{
 		Header:             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36",
 		ApartmentsStopWord: "/category/56",
 		HousesStopWord:     "/category/63",
 	}
 
-	const listamUrl = "https://www.list.am"
+	const listamUrl = "https://www.list.am/ru"
 	const apartmentsPath = "/category/56/"
 	const housesPath = "/category/63/"
 
@@ -83,13 +56,19 @@ func generateScratchData(args CmdArguments) ScratchData {
 	return sd
 }
 
-func getHtmlPages(sd ScratchData) ([]string, error) {
-	getPagesPerCategory := func(urlGenerator func(page int) string, stopWord string) ([]string, error) {
-		client := http.Client{Timeout: time.Duration(10) * time.Second}
-		var pages []string
+func ScratchHtmlPages(sd ScratchData) (map[string]string, error) {
+	getPagesPerCategory := func(urlGenerator func(page int) string, stopWord string) (map[string]string, error) {
+		/* If listam behaves strangely (it can) break */
+		const emergencyTimeoutSec = 30 //< Is a minute to iterate over everything enough ?
+		start := time.Now()
+
+		client := http.Client{}
+		parsedPages := make(map[string]string)
 
 		for page := 1; true; page++ {
-			req, err := http.NewRequest("GET", urlGenerator(page), nil)
+			url := urlGenerator(page)
+
+			req, err := http.NewRequest("GET", url, nil)
 			if err != nil {
 				return nil, fmt.Errorf("error generating request for http.client : %w", err)
 			}
@@ -106,69 +85,86 @@ func getHtmlPages(sd ScratchData) ([]string, error) {
 				break
 			}
 
-			buf := new(bytes.Buffer)
-			buf.ReadFrom(resp.Body)
-			pages = append(pages, buf.String())
+			parsedPages, err = parseHtml(resp.Body)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing page (%s) : %w", url, err)
+			}
+
+			if len(parsedPages) == 0 {
+				return parsedPages, nil
+			}
+
+			/* Protection from strange listam behaviour */
+			if time.Since(start).Seconds() > emergencyTimeoutSec {
+				return nil, fmt.Errorf("error scratching. timeout. check for the infinite loop : %s", url)
+			}
 		}
 
-		return pages, nil
+		return parsedPages, nil
 	}
 
-	var allPages []string
+	allPages := make(map[string]string)
+
 	pagesPerCategory, err := getPagesPerCategory(sd.ApartmentsIterateUrlDram, sd.ApartmentsStopWord)
 	if err != nil {
 		return nil, err
 	}
-	allPages = append(allPages, pagesPerCategory...)
+	maps.Copy(allPages, pagesPerCategory)
 
 	pagesPerCategory, err = getPagesPerCategory(sd.TownhousesIterateUrlDram, sd.HousesStopWord)
 	if err != nil {
 		return nil, err
 	}
-	allPages = append(allPages, pagesPerCategory...)
+	maps.Copy(allPages, pagesPerCategory)
 
 	pagesPerCategory, err = getPagesPerCategory(sd.HousesIterateUrlDram, sd.HousesStopWord)
 	if err != nil {
 		return nil, err
 	}
-	allPages = append(allPages, pagesPerCategory...)
+	maps.Copy(allPages, pagesPerCategory)
 
 	return allPages, nil
 }
 
-func run(args []string) error {
-	cmdArgs, err := parseCmdLineArgs()
+func parseHtml(r io.Reader) (parsedPage map[string]string, err error) {
+	re, err := regexp.Compile(`[\n\s]`)
 	if err != nil {
-		return fmt.Errorf("error parsing command line args : %w", err)
+		return nil, fmt.Errorf("error compiling regex : %w", err)
 	}
 
-	scratchData := generateScratchData(cmdArgs)
+	parsedPage = make(map[string]string)
 
-	pages, err := getHtmlPages(scratchData)
+	doc, err := html.Parse(r)
 	if err != nil {
-		return fmt.Errorf("error getting html pages : %w", err)
+		return nil, fmt.Errorf("error parsing page : %w", err)
 	}
 
-	fmt.Println(scratchData.ApartmentsIterateUrlDram(1))
-	fmt.Println(scratchData.ApartmentsStopWord)
-	fmt.Println(scratchData.TownhousesIterateUrlDram(1))
-	fmt.Println(scratchData.ApartmentsStopWord)
-	fmt.Println(scratchData.HousesIterateUrlDram(1))
-	fmt.Println(scratchData.HousesStopWord)
-	fmt.Println(len(pages))
+	var parseLink func(*html.Node)
+	parseLink = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "a" {
+			for _, a := range n.Attr {
+				if a.Key == "href" && strings.Contains(a.Val, "/ru/item/") {
+					var description string
+					for c := n.FirstChild; c != nil; c = c.NextSibling {
+						if c.Type != html.ElementNode || c.Data != "div" {
+							continue
+						}
+						for cc := c.FirstChild; cc != nil; cc = cc.NextSibling {
+							description += (cc.Data + ";")
+						}
+					}
+					description = re.ReplaceAllString(description, "")
+					parsedPage[description] = a.Val
+				}
+			}
+		}
 
-	/* Parse htmls and save them to jsons with the corresponding name. Use descriptions` strings as a unique id */
-
-	/* Compare with the old entries. Diffs are the new adds */
-
-	/* Notify */
-
-	return nil
-}
-
-func main() {
-	if err := run(os.Args); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			parseLink(c)
+		}
 	}
+
+	parseLink(doc)
+
+	return parsedPage, nil
 }
