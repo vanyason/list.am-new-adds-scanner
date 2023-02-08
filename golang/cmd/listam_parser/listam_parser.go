@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -82,6 +83,15 @@ func run(args internal.CmdArguments, scratchData internal.ScratchData) error {
 }
 
 func main() {
+	/* create log folder */
+	folderPath := "log"
+	if _, err := os.Stat(folderPath); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(folderPath, os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
 	/* Parse cmd args */
 	cmdArgs, err := internal.ParseCmdLineArgs()
 	if err != nil {

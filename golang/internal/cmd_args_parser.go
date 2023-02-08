@@ -39,8 +39,8 @@ func ParseCmdLineArgs() (CmdArguments, error) {
 		return CmdArguments{}, fmt.Errorf("invalid loop pause: %d. max: %d", args.LoopPause, maxPause)
 	}
 
-	args.LogFileName = fmt.Sprintf("%d_%d.log", args.Rooms, args.Price)
-	args.DBFileName = fmt.Sprintf("%d_%d.json", args.Rooms, args.Price)
+	args.LogFileName = fmt.Sprintf("log/%d_%d.log", args.Rooms, args.Price)
+	args.DBFileName = fmt.Sprintf("log/%d_%d.json", args.Rooms, args.Price)
 
 	return args, nil
 }
