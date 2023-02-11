@@ -16,7 +16,7 @@ func Compare(old, new map[string]string) (newEntries []string) {
 		}
 
 		if !found {
-			newEntries = append(newEntries, keyNew+" : "+valNew)
+			newEntries = append(newEntries, "www.list.am"+valNew)
 		}
 	}
 
