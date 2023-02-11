@@ -9,6 +9,7 @@ help()
    echo "-f              Run functional tests."
    echo "-u              Run unit tests."
    echo "-d              Run app with the default params."
+   echo "-c              Clean log dir."
    echo "nothing         Redirect to the go executable."
 }
 
@@ -28,6 +29,10 @@ run_app() {
     go run cmd/listam_parser/*.go
 }
 
+clean_logdir() {
+    rm -r log/*
+}
+
 ##############
 ### Main #####
 ##############
@@ -44,6 +49,8 @@ elif [ "$1" == "-u" ]; then
     run_unit_tests
 elif [ "$1" == "-d" ]; then
     run_app_default
+elif [ "$1" == "-c" ]; then
+    clean_logdir
 else 
     run_app
 fi
