@@ -9,7 +9,7 @@ import (
 func testTgBot() error {
 	log.Println("Testing Tg bot started ...")
 
-	bot, err := internal.CreateBot("config/bot_config.json")
+	bot, err := internal.CreateBot("config/testbot_config.json")
 	if err != nil {
 		return err
 	}

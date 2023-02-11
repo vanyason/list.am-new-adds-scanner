@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -13,9 +12,11 @@ import (
 	"github.com/vanyason/list.am-new-adds-scanner/internal"
 )
 
-func run(args internal.CmdArguments, scratchData internal.ScratchData) error {
+func run(args internal.CmdArguments, scratchData internal.ScratchData, bot internal.TgBot) error {
 	/* Measure time */
 	start := time.Now()
+	timer := func() { log.Printf("Round took ~ %f seconds", time.Since(start).Seconds()) }
+	defer timer()
 
 	/* Get pages from Listam */
 	parsedPages, err := internal.ScratchHtmlPages(scratchData)
@@ -45,14 +46,14 @@ func run(args internal.CmdArguments, scratchData internal.ScratchData) error {
 	}
 
 	if notExist {
-		err := ioutil.WriteFile(args.DBFileName, newJson, 0644)
+		err := os.WriteFile(args.DBFileName, newJson, 0644)
 		if err != nil {
 			return fmt.Errorf("error saving new json : %w", err)
 		}
 
 		log.Printf("File (%s) created. Continue", args.DBFileName)
 	} else {
-		oldJson, err := ioutil.ReadFile(args.DBFileName)
+		oldJson, err := os.ReadFile(args.DBFileName)
 		if err != nil {
 			return fmt.Errorf("error reading existing json : %w", err)
 		}
@@ -65,20 +66,21 @@ func run(args internal.CmdArguments, scratchData internal.ScratchData) error {
 
 		diffs := internal.Compare(oldPages, parsedPages)
 
-		err = ioutil.WriteFile(args.DBFileName, newJson, 0644)
+		err = os.WriteFile(args.DBFileName, newJson, 0644)
 		if err != nil {
 			return fmt.Errorf("error rewriting old json with new : %w", err)
 		}
 
-		if len(diffs) == 0 {
-			log.Println("diffs not found")
-		} else {
-			log.Printf("diffs : %v", diffs)
-			log.Printf("notifying")
+		if len(diffs) != 0 {
+			for _, diff := range diffs {
+				log.Printf("new add : %s", diff)
+				if err := bot.SendMessageSilently(diff); err != nil {
+					return err
+				}
+			}
 		}
 	}
 
-	log.Printf("Loop took ~ %f seconds", time.Since(start).Seconds())
 	return nil
 }
 
@@ -98,7 +100,7 @@ func main() {
 		log.Fatalf("error parsing command line args : %s", err)
 	}
 
-	/* Setup loging */
+	/* Setup logging */
 	logFile, err := os.OpenFile(cmdArgs.LogFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error creating / opening log file : %s", err)
@@ -108,6 +110,12 @@ func main() {
 	/* Generate params for web scratching */
 	scratchData := internal.GenerateScratchData(cmdArgs)
 
+	/* Create tg bot */
+	bot, err := internal.CreateBot("config/bot_config.json")
+	if err != nil {
+		log.Fatalf("error creating tg bot : %s", err)
+	}
+
 	/* Start app */
 	log.Printf("\nExecution started...\nParams :\n%+v\nUrls :\n%s\n%s\n%s\n",
 		cmdArgs,
@@ -115,7 +123,21 @@ func main() {
 		scratchData.HousesIterateUrlDram(1),
 		scratchData.TownhousesIterateUrlDram((1)))
 
-	if err := run(cmdArgs, scratchData); err != nil {
-		log.Fatalln(err)
+	/* Loop */
+	errCounter := 0
+	for {
+		if err := run(cmdArgs, scratchData, bot); err != nil {
+			log.Println(err)
+			errCounter++
+		}
+		if cmdArgs.ErrorCounter != 0 && errCounter >= int(cmdArgs.ErrorCounter) {
+			break
+		}
+		time.Sleep(time.Duration(cmdArgs.LoopPause) * time.Minute)
 	}
+
+	/* Notify that we are broke */
+	const finalMsg = "Time to check the logs. We are broken"
+	log.Println(finalMsg)
+	_ = bot.SendMessageSilently(finalMsg)
 }
