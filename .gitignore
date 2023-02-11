@@ -2,3 +2,5 @@ parsed.html
 **/log
 .vscode
 *.db
+golang/config/bot_config.json
+golang/config/testbot_config.json
