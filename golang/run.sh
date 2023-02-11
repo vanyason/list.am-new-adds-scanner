@@ -5,7 +5,7 @@ help()
    # Display Help
    echo "Usage: ./run.sh [ -h | -help | -f | -u | -d ] or none"
    echo
-   echo "-h / -help      See this message."
+   echo "-help           See this message."
    echo "-f              Run functional tests."
    echo "-u              Run unit tests."
    echo "-d              Run app with the default params."
@@ -26,7 +26,7 @@ run_app_default() {
 }
 
 run_app() {
-    go run cmd/listam_parser/*.go
+    go run cmd/listam_parser/*.go "$@"
 }
 
 clean_logdir() {
@@ -41,7 +41,7 @@ clean_logdir() {
 # cd "$(dirname "$(readlink -f "$0")")"
 # cd "$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-if [ "$1" == "-h" ] || [ "$1" == "-help" ]; then
+if  [ "$1" == "-help" ]; then
     help
 elif [ "$1" == "-f" ]; then
     run_func_tests
@@ -52,5 +52,5 @@ elif [ "$1" == "-d" ]; then
 elif [ "$1" == "-c" ]; then
     clean_logdir
 else 
-    run_app
+    run_app "$@"
 fi
