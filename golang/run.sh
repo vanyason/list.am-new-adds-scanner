@@ -3,14 +3,13 @@
 help()
 {
    # Display Help
-   echo "Usage: ./run.sh [ -h | -help | -f | -u | -d ] or none"
+   echo "Usage: ./run.sh [ ftests | utests | defaut | cleanlog | params ]"
    echo
-   echo "-help           See this message."
-   echo "-f              Run functional tests."
-   echo "-u              Run unit tests."
-   echo "-d              Run app with the default params."
-   echo "-c              Clean log dir."
-   echo "nothing         Redirect to the go executable."
+   echo "ftests             Run functional tests."
+   echo "utests             Run unit tests."
+   echo "defaut             Run app with the default params."
+   echo "cleanlog           Clean log dir."
+   echo "params             Redirect to the go executable."
 }
 
 run_func_tests() {
@@ -30,7 +29,7 @@ run_app() {
 }
 
 clean_logdir() {
-    rm -r log/*
+    rm -rf log/*.json && rm -rf log/*.log
 }
 
 ##############
@@ -41,16 +40,17 @@ clean_logdir() {
 # cd "$(dirname "$(readlink -f "$0")")"
 # cd "$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-if  [ "$1" == "-help" ]; then
-    help
-elif [ "$1" == "-f" ]; then
+if [ "$1" == "ftests" ]; then
     run_func_tests
-elif [ "$1" == "-u" ]; then
+elif [ "$1" == "utests" ]; then
     run_unit_tests
-elif [ "$1" == "-d" ]; then
+elif [ "$1" == "defaut" ]; then
     run_app_default
-elif [ "$1" == "-c" ]; then
+elif [ "$1" == "cleanlog" ]; then
     clean_logdir
-else 
+elif [ "$1" == "params" ]; then
+    shift
     run_app "$@"
+else 
+    help    
 fi
