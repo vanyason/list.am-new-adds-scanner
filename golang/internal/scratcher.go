@@ -59,7 +59,7 @@ func GenerateScratchData(args CmdArguments) ScratchData {
 func ScratchHtmlPages(sd ScratchData) (map[string]string, error) {
 	getPagesPerCategory := func(urlGenerator func(page int) string, stopWord string) (map[string]string, error) {
 		/* If listam behaves strangely (it can) break */
-		const emergencyTimeoutSec = 30 //< Is a minute to iterate over everything enough ?
+		const emergencyTimeoutSec = 90 //< Is it enough to iterate over everything ?
 		start := time.Now()
 
 		client := http.Client{}

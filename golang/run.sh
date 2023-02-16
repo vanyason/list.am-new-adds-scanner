@@ -3,7 +3,7 @@
 help()
 {
    # Display Help
-   echo "Usage: ./run.sh [ ftests | utests | defaut | cleanlog | params ]"
+   echo "Usage: ./run.sh [ ftests | utests | default | cleanlog | params ]"
    echo
    echo "ftests             Run functional tests."
    echo "utests             Run unit tests."
@@ -44,7 +44,7 @@ if [ "$1" == "ftests" ]; then
     run_func_tests
 elif [ "$1" == "utests" ]; then
     run_unit_tests
-elif [ "$1" == "defaut" ]; then
+elif [ "$1" == "default" ]; then
     run_app_default
 elif [ "$1" == "cleanlog" ]; then
     clean_logdir

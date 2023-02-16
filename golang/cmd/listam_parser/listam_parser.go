@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/vanyason/list.am-new-adds-scanner/internal"
+	"golang.org/x/exp/maps"
 )
 
 func run(args internal.CmdArguments, scratchData internal.ScratchData, bot internal.TgBot) error {
@@ -24,19 +25,13 @@ func run(args internal.CmdArguments, scratchData internal.ScratchData, bot inter
 		return fmt.Errorf("error getting html pages : %w", err)
 	}
 
-	/* Save map to a json */
-	newJson, err := json.Marshal(parsedPages)
-	if err != nil {
-		return fmt.Errorf("error saving parsed pages to json : %w", err)
-	}
-
 	/*
 	 * If there is no saved json :
 	 *    - save and continue
 	 * Else :
 	 *    - read old one
 	 *    - compare / get the diffs
-	 *    - replace old one with the new one
+	 *    - replace old one with the new one (ADD NEW VALUES TO THE OLD)
 	 *	  - notify
 	 */
 	_, err = os.Stat(args.DBFileName)
@@ -46,7 +41,12 @@ func run(args internal.CmdArguments, scratchData internal.ScratchData, bot inter
 	}
 
 	if notExist {
-		err := os.WriteFile(args.DBFileName, newJson, 0644)
+		newJson, err := json.Marshal(parsedPages)
+		if err != nil {
+			return fmt.Errorf("error saving parsed pages to json : %w", err)
+		}
+
+		err = os.WriteFile(args.DBFileName, newJson, 0644)
 		if err != nil {
 			return fmt.Errorf("error saving new json : %w", err)
 		}
@@ -65,6 +65,13 @@ func run(args internal.CmdArguments, scratchData internal.ScratchData, bot inter
 		}
 
 		diffs := internal.Compare(oldPages, parsedPages)
+
+		maps.Copy(oldPages, parsedPages)
+
+		newJson, err := json.Marshal(oldPages)
+		if err != nil {
+			return fmt.Errorf("error saving parsed pages + old pages to json : %w", err)
+		}
 
 		err = os.WriteFile(args.DBFileName, newJson, 0644)
 		if err != nil {
