@@ -21,7 +21,7 @@ run_unit_tests() {
 }
 
 run_app_default() {
-    go run cmd/listam_parser/*.go -p 200000
+    go run cmd/listam_parser/*.go -p 200000 -t 0
 }
 
 run_app() {
