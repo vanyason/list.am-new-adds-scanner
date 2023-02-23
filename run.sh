@@ -17,7 +17,7 @@ run_func_tests() {
 }
 
 run_unit_tests() {
-    go test -v ./...
+    go test -v ./internal/...
 }
 
 run_app_default() {

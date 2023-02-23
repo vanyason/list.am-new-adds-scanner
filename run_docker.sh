@@ -25,7 +25,7 @@ build() {
 }
 
 start() {
-    if [ ! "$(docker ps | grep "$CONTAINER_NAME")" ]; then
+    if [ ! "$(docker ps --all | grep "$CONTAINER_NAME")" ]; then
         echo "Starting container..."
         docker run -d -it --entrypoint /bin/bash -v"$(pwd)":/app --name $CONTAINER_NAME $IMAGE_NAME
     else
@@ -39,7 +39,7 @@ stats() {
 
 stop() {    
     if [ "$(stats)" ]; then 
-        ID=$(docker ps | grep "$CONTAINER_NAME" | awk '{ print $1 }')
+        ID=$(docker ps --all | grep "$CONTAINER_NAME" | awk '{ print $1 }')
         docker stop $ID && docker rm $ID
     else
         echo "Nothing to stop..."
