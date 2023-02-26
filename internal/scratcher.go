@@ -34,23 +34,23 @@ func GenerateScratchData(args CmdArguments) ScratchData {
 
 	if args.Rooms != 0 {
 		sd.ApartmentsIterateUrlDram = func(page int) string {
-			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=1&price2=%d&crc=0&_a4=%d", listamUrl, apartmentsPath, page, args.Price, args.Rooms)
+			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=2&price2=%d&crc=0&_a4=%d", listamUrl, apartmentsPath, page, args.Price, args.Rooms)
 		}
 		sd.TownhousesIterateUrlDram = func(page int) string {
-			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=1&price2=%d&crc=0&_a4=%d&sid=366", listamUrl, housesPath, page, args.Price, args.Rooms)
+			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=2&price2=%d&crc=0&_a4=%d&sid=366", listamUrl, housesPath, page, args.Price, args.Rooms)
 		}
 		sd.HousesIterateUrlDram = func(page int) string {
-			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=1&price2=%d&crc=0&_a4=%d&sid=365", listamUrl, housesPath, page, args.Price, args.Rooms)
+			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=2&price2=%d&crc=0&_a4=%d&sid=365", listamUrl, housesPath, page, args.Price, args.Rooms)
 		}
 	} else {
 		sd.ApartmentsIterateUrlDram = func(page int) string {
-			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=1&price2=%d&crc=0", listamUrl, apartmentsPath, page, args.Price)
+			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=2&price2=%d&crc=0", listamUrl, apartmentsPath, page, args.Price)
 		}
 		sd.TownhousesIterateUrlDram = func(page int) string {
-			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=1&price2=%d&crc=0&&sid=366", listamUrl, housesPath, page, args.Price)
+			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=2&price2=%d&crc=0&&sid=366", listamUrl, housesPath, page, args.Price)
 		}
 		sd.HousesIterateUrlDram = func(page int) string {
-			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=1&price2=%d&crc=0&sid=365", listamUrl, housesPath, page, args.Price)
+			return fmt.Sprintf("%s%s%d?cmtype=1&pfreq=1&po=1&n=2&price2=%d&crc=0&sid=365", listamUrl, housesPath, page, args.Price)
 		}
 	}
 	return sd
