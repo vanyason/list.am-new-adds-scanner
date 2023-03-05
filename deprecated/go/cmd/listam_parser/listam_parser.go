@@ -9,18 +9,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/vanyason/list.am-new-adds-scanner/internal"
+	old "github.com/vanyason/list.am-new-adds-scanner/deprecated/go/lib"
 	"golang.org/x/exp/maps"
 )
 
-func run(args internal.CmdArguments, scratchData internal.ScratchData, bot internal.TgBot) error {
+func run(args old.CmdArguments, scratchData old.ScratchData, bot old.TgBot) error {
 	/* Measure time */
 	start := time.Now()
 	timer := func() { log.Printf("Round took ~ %f seconds", time.Since(start).Seconds()) }
 	defer timer()
 
 	/* Get pages from Listam */
-	parsedPages, err := internal.ScratchHtmlPages(scratchData)
+	parsedPages, err := old.ScratchHtmlPages(scratchData)
 	if err != nil {
 		return fmt.Errorf("error getting html pages : %w", err)
 	}
@@ -64,7 +64,7 @@ func run(args internal.CmdArguments, scratchData internal.ScratchData, bot inter
 			return fmt.Errorf("error parsing existing json : %w", err)
 		}
 
-		diffs := internal.Compare(oldPages, parsedPages)
+		diffs := old.Compare(oldPages, parsedPages)
 
 		maps.Copy(oldPages, parsedPages)
 
@@ -102,7 +102,7 @@ func main() {
 	}
 
 	/* Parse cmd args */
-	cmdArgs, err := internal.ParseCmdLineArgs()
+	cmdArgs, err := old.ParseCmdLineArgs()
 	if err != nil {
 		log.Fatalf("error parsing command line args : %s", err)
 	}
@@ -115,10 +115,10 @@ func main() {
 	log.SetOutput(io.MultiWriter(logFile, os.Stdout))
 
 	/* Generate params for web scratching */
-	scratchData := internal.GenerateScratchData(cmdArgs)
+	scratchData := old.GenerateScratchData(cmdArgs)
 
 	/* Create tg bot */
-	bot, err := internal.CreateBot("config/bot_config.json")
+	bot, err := old.CreateBot("config/bot_config.json")
 	if err != nil {
 		log.Fatalf("error creating tg bot : %s", err)
 	}

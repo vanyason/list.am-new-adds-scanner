@@ -1,3 +1,3 @@
-package internal
+package old
 
 var ParseHtml = parseHtml

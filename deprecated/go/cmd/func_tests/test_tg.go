@@ -3,13 +3,13 @@ package main
 import (
 	"log"
 
-	"github.com/vanyason/list.am-new-adds-scanner/internal"
+	old "github.com/vanyason/list.am-new-adds-scanner/deprecated/go/lib"
 )
 
 func testTgBot() error {
 	log.Println("Testing Tg bot started ...")
 
-	bot, err := internal.CreateBot("config/testbot_config.json")
+	bot, err := old.CreateBot("config/testbot_config.json")
 	if err != nil {
 		return err
 	}

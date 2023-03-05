@@ -13,23 +13,23 @@ help()
 }
 
 run_func_tests() {
-    go run cmd/func_tests/func_tests.go
+    go run deprecated/go/cmd/func_tests/test_tg.go
 }
 
 run_unit_tests() {
-    go test -v ./internal/...
+    go test -v ./deprecated/go/lib...
 }
 
 run_app_default() {
-    go run cmd/listam_parser/*.go -p 200000 -t 0
+    go run deprecated/go/cmd/listam_parser/listam_parser.go -p 200000 -t 0
 }
 
 run_app() {
-    go run cmd/listam_parser/*.go "$@"
+    go run deprecated/go/cmd/listam_parser/listam_parser.go "$@"
 }
 
 clean_logdir() {
-    rm -rf log/*.json && rm -rf log/*.log
+    rm -r log/*
 }
 
 ##############

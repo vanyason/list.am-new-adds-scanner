@@ -1,11 +1,11 @@
-package internal_test
+package old_test
 
 import (
 	"os"
 	"strings"
 	"testing"
 
-	"github.com/vanyason/list.am-new-adds-scanner/internal"
+	"github.com/vanyason/list.am-new-adds-scanner/deprecated/go/lib"
 )
 
 func TestParseHtml(t *testing.T) {
@@ -15,7 +15,7 @@ func TestParseHtml(t *testing.T) {
 		t.Error(err)
 	}
 
-	parsedPages, err := internal.ParseHtml(strings.NewReader(string(html)))
+	parsedPages, err := old.ParseHtml(strings.NewReader(string(html)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +148,7 @@ func TestParseHtmlOnEmptyPage(t *testing.T) {
 		t.Error(err)
 	}
 
-	parsedPages, err := internal.ParseHtml(strings.NewReader(string(html)))
+	parsedPages, err := old.ParseHtml(strings.NewReader(string(html)))
 	if err != nil {
 		t.Fatal(err)
 	}
