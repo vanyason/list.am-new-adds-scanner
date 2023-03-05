@@ -76,10 +76,14 @@ func ScratchHtmlPages(sd ScratchData) (map[string]string, error) {
 			req.Header.Set("User-Agent", sd.Header)
 
 			resp, err := client.Do(req)
-			if err != nil || resp.StatusCode != http.StatusOK {
-				return nil, fmt.Errorf("error executing request for http.client : %w ; status code : %d", err, resp.StatusCode)
+			if err != nil {
+				return nil, fmt.Errorf("error executing request for http.client : %w", err)
 			}
 			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				return nil, fmt.Errorf("error executing request for http.client ; status code : %d", resp.StatusCode)
+			}
 
 			if resp.Request.URL.Path == stopWord {
 				break
