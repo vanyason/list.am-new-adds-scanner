@@ -6,16 +6,11 @@ import (
 
 	"github.com/gocolly/colly"
 
+	"github.com/vanyason/list.am-new-adds-scanner/lib/ads"
 	"github.com/vanyason/list.am-new-adds-scanner/lib/util"
 )
 
-// Representation of the advertisement on list.am
-type Ad struct {
-	Link  string
-	Price string
-	Dscr  string
-	At    string
-}
+type Ad = ads.Ad
 
 // Entity that collects data from list.am
 type Scraper struct {
