@@ -21,7 +21,7 @@ func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 func loadFile(t *testing.T, filePath string) (dat []byte) {
 	dat, err := os.ReadFile(filePath)
 	if err != nil {
-		t.Errorf("Can not read file \"%s\"", filePath)
+		t.Fatalf("Can not read file \"%s\"", filePath)
 	}
 
 	return dat
@@ -48,7 +48,7 @@ func makeScraper(dat []byte, statusCode int) Scraper {
 
 func checkErr(t *testing.T, err error) {
 	if err != nil {
-		t.Errorf("Smth returned error (but shouldn`t) \"%s\"", err)
+		t.Fatalf("Smth returned error (but shouldn`t) \"%s\"", err)
 	}
 }
 
@@ -113,12 +113,12 @@ func TestScrapDramFull(t *testing.T) {
 
 	ads, err := s.Scrap()
 	if err != nil {
-		t.Errorf("Expected Scrap result not to return err but got \"%s\"", err)
+		t.Fatalf("Expected Scrap result not to return err but got \"%s\"", err)
 	}
 
 	const expectedLen = 105
 	if len := len(ads); len != expectedLen {
-		t.Errorf("Expected ads len to be %d but got %d", expectedLen, len)
+		t.Fatalf("Expected ads len to be %d but got %d", expectedLen, len)
 	}
 }
 
@@ -138,12 +138,12 @@ func TestScrapDramShort(t *testing.T) {
 	}
 
 	if len := len(ads); len != expectedLen {
-		t.Errorf("Expected ads len to be %d but got %d", expectedLen, len)
+		t.Fatalf("Expected ads len to be %d but got %d", expectedLen, len)
 	}
 
 	for i := range ads {
 		if ads[i] != expectedAds[i] {
-			t.Errorf("Expected ad %v but got %v", ads[i], expectedAds[i])
+			t.Fatalf("Expected ad %v but got %v", ads[i], expectedAds[i])
 		}
 	}
 }
@@ -167,12 +167,12 @@ func TestScrapDramShortLinked(t *testing.T) {
 	}
 
 	if len := len(ads); len != expectedLen {
-		t.Errorf("Expected ads len to be %d but got %d", expectedLen, len)
+		t.Fatalf("Expected ads len to be %d but got %d", expectedLen, len)
 	}
 
 	for i := range ads {
 		if ads[i] != expectedAds[i] {
-			t.Errorf("Expected ad %v but got %v", ads[i], expectedAds[i])
+			t.Fatalf("Expected ad %v but got %v", ads[i], expectedAds[i])
 		}
 	}
 }
@@ -188,7 +188,7 @@ func TestScrapInvalidHtml(t *testing.T) {
 
 	const expectedLen = 0
 	if len := len(ads); len != expectedLen {
-		t.Errorf("Expected ads len to be %d but got %d", expectedLen, len)
+		t.Fatalf("Expected ads len to be %d but got %d", expectedLen, len)
 	}
 }
 
@@ -203,7 +203,7 @@ func TestScrapIncorrectHtml(t *testing.T) {
 
 	const expectedLen = 0
 	if len := len(ads); len != expectedLen {
-		t.Errorf("Expected ads len to be %d but got %d", expectedLen, len)
+		t.Fatalf("Expected ads len to be %d but got %d", expectedLen, len)
 	}
 }
 
@@ -233,12 +233,12 @@ func TestScrapDifferentHtml(t *testing.T) {
 	}
 
 	if len := len(ads); len != expectedLen {
-		t.Errorf("Expected ads len to be %d but got %d", expectedLen, len)
+		t.Fatalf("Expected ads len to be %d but got %d", expectedLen, len)
 	}
 
 	for i := range ads {
 		if ads[i] != expectedAds[i] {
-			t.Errorf("Expected ad %v but got %v", ads[i], expectedAds[i])
+			t.Fatalf("Expected ad %v but got %v", ads[i], expectedAds[i])
 		}
 	}
 }
